@@ -143,8 +143,16 @@
     box-shadow:0 10px 24px -8px rgba(200,155,60,0.55);
   }
   .nav-cta::after{display:none;}
-  .navlinks{display:flex; align-items:center; gap:34px;}
-  @media (max-width:900px){ .navlinks a:not(.nav-cta){display:none;} .navlinks{gap:16px;} }
+  .nav-admin{
+    background:transparent; border:1px solid var(--gold-300);
+    color:var(--gold-300) !important; box-shadow:none; padding:9px 16px;
+  }
+  .navlinks{display:flex; align-items:center; gap:24px;}
+  @media (max-width:900px){
+    .navlinks a:not(.nav-cta){display:none;}
+    .navlinks{gap:8px;}
+    .navlinks .nav-cta{padding:8px 11px;font-size:10.5px;letter-spacing:.02em;}
+  }
 
   /* ---------- hero ---------- */
   .hero{
@@ -497,6 +505,7 @@
         <a href="#gallery">Gallery</a>
         <a href="#contact">Contact</a>
       </nav>
+      <a href="./admin.html" class="nav-cta nav-admin">Admin Login</a>
       <a href="#booking" class="nav-cta">Book Now</a>
     </div>
   </div>
