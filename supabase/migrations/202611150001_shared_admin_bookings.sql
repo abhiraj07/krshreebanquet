@@ -34,11 +34,16 @@ begin
     from pg_index i
     join pg_class t on t.oid = i.indrelid
     join pg_namespace n on n.oid = t.relnamespace
-    where n.nspname = 'public' and t.relname = 'booking_dates'
+    join pg_attribute a on a.attrelid = t.oid and a.attname = 'booking_date'
+    where n.nspname = 'public'
+      and t.relname = 'booking_dates'
       and i.indisunique
-      and pg_get_indexdef(i.indexrelid) ilike '%(booking_date)%'
+      and i.indisvalid
+      and i.indpred is null
+      and i.indnkeyatts = 1
+      and i.indkey[0] = a.attnum
   ) then
-    raise exception 'public.booking_dates needs a unique constraint/index on booking_date for safe upsert.';
+    raise exception 'public.booking_dates needs a valid, non-partial unique index on booking_date alone for safe upsert.';
   end if;
 
   if not exists (
