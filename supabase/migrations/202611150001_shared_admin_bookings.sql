@@ -12,6 +12,8 @@ create table if not exists public.admin_users (
 );
 
 alter table public.admin_users enable row level security;
+revoke all on public.admin_users from anon, public;
+grant select on public.admin_users to authenticated;
 
 drop policy if exists "admin_users_read_own" on public.admin_users;
 create policy "admin_users_read_own"
@@ -50,6 +52,7 @@ create table if not exists public.admin_bookings (
 );
 
 alter table public.admin_bookings enable row level security;
+revoke all on public.admin_bookings from anon, public;
 
 drop policy if exists "admin_bookings_admin_select" on public.admin_bookings;
 create policy "admin_bookings_admin_select"
