@@ -90,6 +90,37 @@ $$;
 revoke all on function public.is_shree_admin() from public;
 grant execute on function public.is_shree_admin() to authenticated;
 
+-- Realtime is required by the web calendars and Android selectAsFlow streams.
+-- Add the three shared tables idempotently; existing publication membership is preserved.
+do $realtime$
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    raise exception 'Supabase Realtime publication supabase_realtime was not found; inspect the project publication configuration before applying.';
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'booking_dates'
+  ) then
+    execute 'alter publication supabase_realtime add table public.booking_dates';
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'admin_bookings'
+  ) then
+    execute 'alter publication supabase_realtime add table public.admin_bookings';
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'admin_users'
+  ) then
+    execute 'alter publication supabase_realtime add table public.admin_users';
+  end if;
+end;
+$realtime$;
+
 create table if not exists public.admin_bookings (
   booking_date date primary key,
   status text not null check (status in ('pending', 'booked')),
