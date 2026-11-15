@@ -39,7 +39,7 @@ One Supabase-backed booking system shared by the public website, private admin c
 ## Integration blockers found during cross-review (2026-11-15)
 - [x] Main website `/admin.html` has been replaced on the feature branch with the exact same admin page/form as the private calendar website. Both files were fetched again and verified byte-for-byte identical. It now uses the shared `save_shree_booking` and `clear_shree_booking` RPC workflow; the legacy direct-write form is no longer in the feature-branch version.
 - [ ] After deployment, verify the main website Admin Login and the private calendar URL both load the same shared admin experience and authenticate against the same Supabase Auth user.
-- [ ] Confirm the existing `booking_dates` RLS policies permit anonymous SELECT of only the public-safe fields and do not permit anonymous INSERT/UPDATE/DELETE.
+- [x] Migration now enables RLS on `booking_dates`, revokes broad table privileges from public/anon/authenticated, grants SELECT only on `booking_date` and `status`, and creates a read-only public SELECT policy. Review existing policies/privileges during preflight before applying.
 - [ ] Confirm the Supabase Auth user ID/email in the migration preflight matches the actual project account before applying SQL.
 - [x] Migration now idempotently adds `booking_dates`, `admin_bookings`, and `admin_users` to the `supabase_realtime` publication (after the new table is created). Confirm publication permissions and successful migration during preflight.
 - [ ] Verify all three clients receive changes and that `admin_users` RLS still exposes only the signed-in user's own allow-list row.
@@ -53,3 +53,10 @@ One Supabase-backed booking system shared by the public website, private admin c
 - [x] Enforce the same allowed Event Type values in the database RPC and admin_bookings table constraint, not only in the client dropdown.
 - [ ] Complete emulator/device visual test of the Android form.
 - [ ] Verify shared login, create/edit/clear, and realtime propagation across all three clients after the SQL migration is safely applied.
+
+
+## Admin login diagnosis and hardening (2026-11-15)
+- [x] Web admin pages no longer depend on a hard-coded Auth UUID. After password sign-in, they verify the current Auth user against their own row in `admin_users` under RLS.
+- [x] Migration now resolves the admin Auth user by the verified email `krshreebanquethall@gmail.com` and requires exactly one matching Auth user; it no longer assumes a fixed UUID.
+- [x] Android accepts either the admin username or registered email as the login identifier.
+- [ ] Live login still cannot be verified until the migration is applied and the actual Supabase Auth password is confirmed. Do not treat the current deployed page as updated until the PR changes are deployed.
