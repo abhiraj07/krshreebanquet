@@ -23,6 +23,13 @@ begin
   end if;
 
   if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'booking_dates' and column_name = 'updated_at'
+  ) then
+    raise exception 'public.booking_dates must contain updated_at because the save RPC maintains this timestamp.';
+  end if;
+
+  if not exists (
     select 1
     from pg_index i
     join pg_class t on t.oid = i.indrelid
