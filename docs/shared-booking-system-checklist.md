@@ -37,9 +37,17 @@ One Supabase-backed booking system shared by the public website, private admin c
 
 
 ## Integration blockers found during cross-review (2026-11-15)
-- [ ] The legacy `/admin.html` page currently writes directly to `booking_dates` and does not update `admin_bookings`. Do not use this legacy page for booking changes after the shared migration; doing so can leave public status and private details inconsistent.
-- [ ] Before rollout, either replace the legacy admin page with a safe handoff to the private admin calendar (after its deployed URL is confirmed), or update it to use a workflow that cannot overwrite existing private details with blank values.
+- [x] Main website `/admin.html` has been replaced on the feature branch with the exact same admin page/form as the private calendar website. Both files were fetched again and verified byte-for-byte identical. It now uses the shared `save_shree_booking` and `clear_shree_booking` RPC workflow; the legacy direct-write form is no longer in the feature-branch version.
+- [ ] After deployment, verify the main website Admin Login and the private calendar URL both load the same shared admin experience and authenticate against the same Supabase Auth user.
 - [ ] Confirm the existing `booking_dates` RLS policies permit anonymous SELECT of only the public-safe fields and do not permit anonymous INSERT/UPDATE/DELETE.
 - [ ] Confirm the Supabase Auth user ID/email in the migration preflight matches the actual project account before applying SQL.
 - [ ] Enable Supabase Realtime for `booking_dates`, `admin_bookings`, and `admin_users` after migration. The Android admin allow-list check currently uses `selectAsFlow` on `admin_users`, so omitting that table from the Realtime publication can prevent admin authorization from initializing.
 - [ ] Verify all three clients receive changes and that `admin_users` RLS still exposes only the signed-in user's own allow-list row.
+
+
+## Cross-platform parity review (2026-11-15)
+- [x] Main website admin form and private calendar admin form are byte-for-byte identical on the feature branches.
+- [x] Web admin form and Android data/repository model contain the same booking fields: date, status, client/host name, phone, event type, and private notes.
+- [x] Web and Android use the same Supabase tables (`booking_dates`, `admin_bookings`, `admin_users`) and the same `save_shree_booking` / `clear_shree_booking` RPC names.
+- [ ] Confirm Android UI field labels, status actions, and event-type options match the web form in an emulator/device test.
+- [ ] Verify shared login, create/edit/clear, and realtime propagation across all three clients after the SQL migration is safely applied.
