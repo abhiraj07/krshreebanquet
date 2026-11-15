@@ -90,6 +90,21 @@ $$;
 revoke all on function public.is_shree_admin() from public;
 grant execute on function public.is_shree_admin() to authenticated;
 
+
+
+create table if not exists public.admin_bookings (
+  booking_date date primary key,
+  status text not null check (status in ('pending', 'booked')),
+  client_name text not null default '',
+  client_phone text not null default '',
+  event_type text not null default '' check (event_type in ('', 'Marriage', 'Engagement', 'Anniversary', 'Meeting', 'Birthday Party', 'Others')),
+  notes text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id)
+);
+
+
 -- Realtime is required by the web calendars and Android selectAsFlow streams.
 -- Add the three shared tables idempotently; existing publication membership is preserved.
 do $realtime$
@@ -120,19 +135,6 @@ begin
   end if;
 end;
 $realtime$;
-
-create table if not exists public.admin_bookings (
-  booking_date date primary key,
-  status text not null check (status in ('pending', 'booked')),
-  client_name text not null default '',
-  client_phone text not null default '',
-  event_type text not null default '' check (event_type in ('', 'Marriage', 'Engagement', 'Anniversary', 'Meeting', 'Birthday Party', 'Others')),
-  notes text not null default '',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  updated_by uuid references auth.users(id)
-);
-
 alter table public.admin_bookings enable row level security;
 revoke all on public.admin_bookings from anon, public;
 
