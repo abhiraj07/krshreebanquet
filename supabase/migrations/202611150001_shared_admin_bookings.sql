@@ -55,6 +55,19 @@ begin
 end;
 $preflight$;
 
+-- Lock the existing calendar table to public-safe, read-only columns.
+-- All writes are performed by the SECURITY DEFINER booking RPCs below.
+alter table public.booking_dates enable row level security;
+revoke all on table public.booking_dates from public, anon, authenticated;
+grant select (booking_date, status) on table public.booking_dates to anon, authenticated;
+
+drop policy if exists "booking_dates_public_read" on public.booking_dates;
+create policy "booking_dates_public_read"
+  on public.booking_dates
+  for select
+  to anon, authenticated
+  using (true);
+
 create table if not exists public.admin_users (
   user_id uuid primary key references auth.users(id) on delete cascade,
   username text not null unique,
