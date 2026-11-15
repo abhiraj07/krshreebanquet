@@ -968,7 +968,7 @@ async function loadPublicCalendar(){
   const start=publicIso(new Date(publicMonth.getFullYear(),publicMonth.getMonth(),1));
   const end=publicIso(new Date(publicMonth.getFullYear(),publicMonth.getMonth()+1,0));
   status.textContent='Updating availability…';
-  const {data,error}=await publicDb.from('booking_dates').select('booking_date,status').gte('booking_date',start).lte('booking_date',end);
+  const {data,error}=await publicDb.from('public_booking_calendar').select('booking_date,status').gte('booking_date',start).lte('booking_date',end);
   if(error){status.textContent='Calendar is temporarily unavailable. Please contact us to confirm a date.';return}
   const records=new Map((data||[]).map(row=>[row.booking_date,row.status]));
   const first=new Date(publicMonth.getFullYear(),publicMonth.getMonth(),1),offset=first.getDay(),count=new Date(publicMonth.getFullYear(),publicMonth.getMonth()+1,0).getDate();
