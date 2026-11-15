@@ -91,3 +91,10 @@ Project matched: `shree-banquet-admin` (`agshupnzhpeqiwezsnyp`), region `ap-sout
 
 Latest migration hardening commit: `3c4d6899a1c705bba6981a6fa946ec502241dc08`.
 Production database, deployed websites, Android release, and Firebase have not been changed. Keep PRs open/draft and wait for explicit approval before applying SQL or deploying.
+
+
+## Legacy status-only records in admin views (2026-11-15)
+- [x] Web admin upcoming list now combines public status dates with private detail records; a pre-existing status-only date appears as "Details not added" instead of disappearing.
+- [x] Android admin private-records list now performs the same merge and shows "Details not added" for status-only dates.
+- [x] Main website and private calendar `admin.html` were fetched again after the patch and verified byte-for-byte identical.
+- [ ] Device-level visual confirmation remains pending; Android CI run #51 is building the updated screen code.
