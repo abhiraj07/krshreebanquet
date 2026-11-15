@@ -55,6 +55,17 @@ begin
 end;
 $preflight$;
 
+-- Harden the existing automatic-RLS event-trigger function. Revoking client
+-- EXECUTE does not remove the installed event trigger; it only removes direct
+-- API exposure through the public schema.
+do $harden_rls_event_trigger$
+begin
+  if to_regprocedure('public.rls_auto_enable()') is not null then
+    execute 'revoke all on function public.rls_auto_enable() from public, anon, authenticated';
+  end if;
+end;
+$harden_rls_event_trigger$;
+
 -- Lock the existing calendar table to public-safe, read-only columns.
 -- All writes are performed by the SECURITY DEFINER booking RPCs below.
 alter table public.booking_dates enable row level security;
@@ -81,6 +92,13 @@ $column_grants$;
 
 grant select (booking_date, status) on table public.booking_dates to anon, authenticated;
 
+-- Remove legacy direct-admin policies tied to the previous hard-coded Auth UUID.
+-- Writes now go only through the allow-listed SECURITY DEFINER RPCs.
+drop policy if exists "Admin can add bookings" on public.booking_dates;
+drop policy if exists "Admin can delete bookings" on public.booking_dates;
+drop policy if exists "Admin can update bookings" on public.booking_dates;
+drop policy if exists "Admin can view bookings" on public.booking_dates;
+drop policy if exists "Public can view booking availability" on public.booking_dates;
 drop policy if exists "booking_dates_public_read" on public.booking_dates;
 create policy "booking_dates_public_read"
   on public.booking_dates
