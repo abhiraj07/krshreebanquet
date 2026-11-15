@@ -95,7 +95,7 @@ create table if not exists public.admin_bookings (
   status text not null check (status in ('pending', 'booked')),
   client_name text not null default '',
   client_phone text not null default '',
-  event_type text not null default '',
+  event_type text not null default '' check (event_type in ('', 'Marriage', 'Engagement', 'Anniversary', 'Meeting', 'Birthday Party', 'Others')),
   notes text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -159,6 +159,10 @@ begin
 
   if p_status not in ('pending', 'booked') then
     raise exception 'Status must be pending or booked';
+  end if;
+
+  if coalesce(p_event_type, '') not in ('', 'Marriage', 'Engagement', 'Anniversary', 'Meeting', 'Birthday Party', 'Others') then
+    raise exception 'Event type is not one of the allowed options';
   end if;
 
   insert into public.booking_dates (booking_date, status, updated_at)
