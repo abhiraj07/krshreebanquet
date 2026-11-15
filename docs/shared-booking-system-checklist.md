@@ -68,3 +68,26 @@ One Supabase-backed booking system shared by the public website, private admin c
 - [ ] Verify the live project's current `booking_dates` schema, unique index, RLS policies, grants, Realtime publication, and exact Auth user before any SQL execution.
 - [ ] Review/confirm Supabase migration owner privileges and function execution grants in the actual project before rollout.
 - [ ] Do not apply SQL, deploy websites, merge PRs, or disable Firebase until the preflight is complete and the owner explicitly approves the rollout.
+
+
+## Live Supabase read-only preflight (2026-11-15)
+
+Project matched: `shree-banquet-admin` (`agshupnzhpeqiwezsnyp`), region `ap-south-1`, project status `ACTIVE_HEALTHY`.
+
+- [x] Confirmed `public.booking_dates` exists with `booking_date date`, `status text`, `created_at`, and `updated_at`; primary key / valid unique index is on `booking_date` alone.
+- [x] Confirmed 5 existing main calendar rows (4 `booked`, 1 `pending`); the existing status check allows `pending` and `booked`, matching the RPC's database values. Existing rows are not modified by preflight.
+- [x] Confirmed `public.private_booking_dates` is a separate legacy table with 2 `booked` rows. It is not touched by the shared migration.
+- [x] Confirmed RLS is enabled on both existing calendar tables.
+- [x] Confirmed exactly one confirmed Supabase Auth account matches `krshreebanquethall@gmail.com`; migration can seed the admin allow-list without a hard-coded UUID.
+- [x] Confirmed `public.admin_users` and `public.admin_bookings` do not currently exist.
+- [x] Confirmed `supabase_realtime` publication exists and publishes INSERT/UPDATE/DELETE, but currently has no tables. Migration adds the three shared tables.
+- [x] Reviewed current `booking_dates` policies and grants. Existing public/admin policies and column-level grants are explicitly removed/replaced by the migration; only `booking_date` and `status` are re-granted to public client roles.
+- [x] Confirmed migration execution context is database role `postgres`.
+- [x] Reviewed existing `ensure_rls` event trigger and `rls_auto_enable()` function. The function is SECURITY DEFINER with `search_path=pg_catalog`, but had default EXECUTE access for anon/authenticated. Latest migration commit revokes client EXECUTE without removing the installed event trigger.
+- [ ] Existing Auth security setting: leaked-password protection is disabled. Recommend enabling it in Supabase Auth settings as a separate owner-approved security setting.
+- [ ] Existing performance advisor reports auth/RLS initplan warnings on old policies for `booking_dates` and `private_booking_dates`. New `booking_dates` policy uses the safe public read path; legacy `private_booking_dates` remains unchanged pending a separate decision.
+- [x] Supabase health advisor returned no health lints.
+- [x] No Supabase migration has been applied; this preflight used read-only SQL only.
+
+Latest migration hardening commit: `3c4d6899a1c705bba6981a6fa946ec502241dc08`.
+Production database, deployed websites, Android release, and Firebase have not been changed. Keep PRs open/draft and wait for explicit approval before applying SQL or deploying.
