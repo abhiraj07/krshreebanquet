@@ -59,6 +59,26 @@ $preflight$;
 -- All writes are performed by the SECURITY DEFINER booking RPCs below.
 alter table public.booking_dates enable row level security;
 revoke all on table public.booking_dates from public, anon, authenticated;
+
+-- Table-level REVOKE does not clear older column-level grants. Remove those too,
+-- then grant back only the two fields that the public calendar is allowed to read.
+do $column_grants$
+declare
+  col record;
+begin
+  for col in
+    select column_name
+    from information_schema.columns
+    where table_schema = 'public' and table_name = 'booking_dates'
+  loop
+    execute format(
+      'revoke select (%I), insert (%I), update (%I), references (%I) on table public.booking_dates from public, anon, authenticated',
+      col.column_name, col.column_name, col.column_name, col.column_name
+    );
+  end loop;
+end;
+$column_grants$;
+
 grant select (booking_date, status) on table public.booking_dates to anon, authenticated;
 
 drop policy if exists "booking_dates_public_read" on public.booking_dates;
