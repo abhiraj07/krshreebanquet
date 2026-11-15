@@ -46,12 +46,11 @@ begin
     raise exception 'public.booking_dates needs a valid, non-partial unique index on booking_date alone for safe upsert.';
   end if;
 
-  if not exists (
-    select 1 from auth.users
-    where id = '5643d2c0-ffc0-4318-b796-6c7eb2d2bc60'::uuid
-      and lower(coalesce(email, '')) = 'krshreebanquethall@gmail.com'
-  ) then
-    raise exception 'Configured admin Auth user ID/email was not found. Verify the Supabase Auth user and update the admin_users seed before applying.';
+  if (
+    select count(*) from auth.users
+    where lower(coalesce(email, '')) = 'krshreebanquethall@gmail.com'
+  ) <> 1 then
+    raise exception 'Expected exactly one Supabase Auth user with email krshreebanquethall@gmail.com. Verify the Auth account before applying.';
   end if;
 end;
 $preflight$;
@@ -253,7 +252,9 @@ grant execute on function public.clear_shree_booking(date) to authenticated;
 -- Existing Supabase Auth admin from the current main website.
 -- This is an allow-list entry, not a password or secret.
 insert into public.admin_users (user_id, username)
-values ('5643d2c0-ffc0-4318-b796-6c7eb2d2bc60', 'admin980123')
+select id, 'admin980123'
+from auth.users
+where lower(coalesce(email, '')) = 'krshreebanquethall@gmail.com'
 on conflict (user_id) do update set username = excluded.username;
 
 commit;
