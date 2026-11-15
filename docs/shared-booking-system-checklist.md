@@ -60,3 +60,11 @@ One Supabase-backed booking system shared by the public website, private admin c
 - [x] Migration now resolves the admin Auth user by the verified email `krshreebanquethall@gmail.com` and requires exactly one matching Auth user; it no longer assumes a fixed UUID.
 - [x] Android accepts either the admin username or registered email as the login identifier.
 - [ ] Live login still cannot be verified until the migration is applied and the actual Supabase Auth password is confirmed. Do not treat the current deployed page as updated until the PR changes are deployed.
+
+## Latest verification update (2026-11-15)
+- [x] Public calendar hardening also revokes any legacy column-level SELECT/INSERT/UPDATE/REFERENCES grants on every existing `booking_dates` column before restoring SELECT on only `booking_date` and `status`. This closes a possible privilege leak that table-level REVOKE alone would not remove.
+- [x] Android Supabase debug build completed successfully in GitHub Actions; APK artifact was uploaded and extracted for verification.
+- [ ] Install and test the debug APK on a real Android device/emulator after the Supabase migration is safely applied.
+- [ ] Verify the live project's current `booking_dates` schema, unique index, RLS policies, grants, Realtime publication, and exact Auth user before any SQL execution.
+- [ ] Review/confirm Supabase migration owner privileges and function execution grants in the actual project before rollout.
+- [ ] Do not apply SQL, deploy websites, merge PRs, or disable Firebase until the preflight is complete and the owner explicitly approves the rollout.
