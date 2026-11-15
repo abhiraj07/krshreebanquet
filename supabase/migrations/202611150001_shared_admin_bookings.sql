@@ -5,6 +5,45 @@
 
 begin;
 
+-- Fail early rather than applying against an incompatible legacy table or wrong Auth account.
+do $preflight$
+begin
+  if to_regclass('public.booking_dates') is null then
+    raise exception 'Expected public.booking_dates table was not found; inspect the existing Supabase schema before applying this migration.';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'booking_dates' and column_name = 'booking_date'
+  ) or not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'booking_dates' and column_name = 'status'
+  ) then
+    raise exception 'public.booking_dates must contain booking_date and status columns.';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_index i
+    join pg_class t on t.oid = i.indrelid
+    join pg_namespace n on n.oid = t.relnamespace
+    where n.nspname = 'public' and t.relname = 'booking_dates'
+      and i.indisunique
+      and pg_get_indexdef(i.indexrelid) ilike '%(booking_date)%'
+  ) then
+    raise exception 'public.booking_dates needs a unique constraint/index on booking_date for safe upsert.';
+  end if;
+
+  if not exists (
+    select 1 from auth.users
+    where id = '5643d2c0-ffc0-4318-b796-6c7eb2d2bc60'::uuid
+      and lower(coalesce(email, '')) = 'krshreebanquethall@gmail.com'
+  ) then
+    raise exception 'Configured admin Auth user ID/email was not found. Verify the Supabase Auth user and update the admin_users seed before applying.';
+  end if;
+end;
+$preflight$;
+
 create table if not exists public.admin_users (
   user_id uuid primary key references auth.users(id) on delete cascade,
   username text not null unique,
