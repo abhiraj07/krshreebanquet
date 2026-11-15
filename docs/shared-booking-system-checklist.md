@@ -41,7 +41,7 @@ One Supabase-backed booking system shared by the public website, private admin c
 - [ ] After deployment, verify the main website Admin Login and the private calendar URL both load the same shared admin experience and authenticate against the same Supabase Auth user.
 - [ ] Confirm the existing `booking_dates` RLS policies permit anonymous SELECT of only the public-safe fields and do not permit anonymous INSERT/UPDATE/DELETE.
 - [ ] Confirm the Supabase Auth user ID/email in the migration preflight matches the actual project account before applying SQL.
-- [ ] Enable Supabase Realtime for `booking_dates`, `admin_bookings`, and `admin_users` after migration. The Android admin allow-list check currently uses `selectAsFlow` on `admin_users`, so omitting that table from the Realtime publication can prevent admin authorization from initializing.
+- [x] Migration now idempotently adds `booking_dates`, `admin_bookings`, and `admin_users` to the `supabase_realtime` publication (after the new table is created). Confirm publication permissions and successful migration during preflight.
 - [ ] Verify all three clients receive changes and that `admin_users` RLS still exposes only the signed-in user's own allow-list row.
 
 
