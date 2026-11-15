@@ -49,5 +49,6 @@ One Supabase-backed booking system shared by the public website, private admin c
 - [x] Main website admin form and private calendar admin form are byte-for-byte identical on the feature branches.
 - [x] Web admin form and Android data/repository model contain the same booking fields: date, status, client/host name, phone, event type, and private notes.
 - [x] Web and Android use the same Supabase tables (`booking_dates`, `admin_bookings`, `admin_users`) and the same `save_shree_booking` / `clear_shree_booking` RPC names.
-- [ ] Confirm Android UI field labels, status actions, and event-type options match the web form in an emulator/device test.
+- [x] Align Android and web admin field labels and input behaviour: Client / Host Name (100 chars), Phone Number (30 chars), Event Type (60 chars, free text), Private Management Notes (500 chars). Android Save Booking and Clear Booking labels now match web wording.
+- [ ] Complete emulator/device visual test of the Android form.
 - [ ] Verify shared login, create/edit/clear, and realtime propagation across all three clients after the SQL migration is safely applied.
