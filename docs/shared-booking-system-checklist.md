@@ -98,3 +98,16 @@ Production database, deployed websites, Android release, and Firebase have not b
 - [x] Android admin private-records list now performs the same merge and shows "Details not added" for status-only dates.
 - [x] Main website and private calendar `admin.html` were fetched again after the patch and verified byte-for-byte identical.
 - [ ] Device-level visual confirmation remains pending; Android CI run #51 is building the updated screen code.
+
+
+## Production Supabase migration applied and verified (2026-11-15)
+- [x] Applied migration `shared_admin_bookings_202611150001` to project `agshupnzhpeqiwezsnyp`; Supabase migration history records version `20261115151040`.
+- [x] Verified `admin_users` and `admin_bookings` created with RLS enabled; allow-list contains the one intended admin account.
+- [x] Verified Realtime publication now includes `booking_dates`, `admin_bookings`, and `admin_users`.
+- [x] Verified anonymous role can read only the date/status columns of `booking_dates`; it cannot read `created_at`, `admin_bookings`, or `admin_users`, and cannot execute save/clear RPCs.
+- [x] Verified a non-admin authenticated subject sees zero rows in `admin_bookings`; `is_shree_admin()` is false for an unlisted user.
+- [x] Verified SECURITY DEFINER RPCs have fixed empty search_path and are executable by authenticated users only; the existing RLS event-trigger function is no longer executable by anon/authenticated.
+- [x] Verified original records preserved: `booking_dates` 5 rows (4 booked, 1 pending); `private_booking_dates` 2 rows; new `admin_bookings` 0 rows before any new admin entry.
+- [x] Android CI run #51 passed for commit `23496b559f0926d58e10ae4c9885c7326d244894`; APK artifact `14167352680`, SHA-256 `b44d8ae1f9384e71afddd88ac83c1fc8143f08d9d704cc9ba43905798b88856b`.
+- [ ] Admin password login and real cross-client create/edit/clear/realtime test still require device/browser session testing. Do not report these as completed.
+- [ ] Security advisor still reports authenticated execution of the three intended SECURITY DEFINER admin functions; each function checks allow-list authorization, and anon is denied. Auth leaked-password protection remains disabled.
